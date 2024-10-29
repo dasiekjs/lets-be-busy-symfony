@@ -1,0 +1,6 @@
+when@dev:
+  maker:
+    root_namespace: 'LetsBeBusy'
+    generate_final_classes: true
+    generate_final_entities: false
+
