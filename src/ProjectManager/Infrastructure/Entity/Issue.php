@@ -18,14 +18,20 @@ class Issue
     #[ORM\Column(type: 'text')]
     private string $content;
 
-    #[ORM\Column(type: 'date_immutable')]
+    #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeInterface $createdAt;
-    #[ORM\Column(type: 'date_immutable')]
+    #[ORM\Column(type: 'datetime_immutable')]
     private ?\DateTimeInterface $updatedAt;
 
     #[ORM\ManyToOne(targetEntity: Project::class)]
     #[ORM\JoinColumn(name: 'project_id', referencedColumnName: 'id', nullable: false)]
     private Project $project;
+
+
+    public function __construct(string $id)
+    {
+        $this->id = $id;
+    }
 
     public function getId(): string
     {
@@ -57,14 +63,22 @@ class Issue
         return $this->project;
     }
 
-    public function setTitle(string $title): void
+    public function setProject(Project $project): self
     {
-        $this->title = $title;
+        $this->project = $project;
+        return $this;
     }
 
-    public function setContent(string $content): void
+    public function setTitle(string $title): self
+    {
+        $this->title = $title;
+        return $this;
+    }
+
+    public function setContent(string $content): self
     {
         $this->content = $content;
+        return $this;
     }
 
     #[ORM\PrePersist]

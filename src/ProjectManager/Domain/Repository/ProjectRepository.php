@@ -7,7 +7,7 @@ use LetsBeBusy\ProjectManager\Domain\ProjectId;
 
 interface ProjectRepository
 {
-    public function save(Project $project);
+    public function save(Project $project): void;
 
     public function getById(ProjectId $id): ?Project;
 

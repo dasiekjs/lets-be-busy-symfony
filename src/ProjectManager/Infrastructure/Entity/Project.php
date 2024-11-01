@@ -3,8 +3,9 @@
 namespace LetsBeBusy\ProjectManager\Infrastructure\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use LetsBeBusy\ProjectManager\Infrastructure\Repository\DbalProjectRepository;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: DbalProjectRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 class Project
 {
@@ -18,11 +19,16 @@ class Project
     #[ORM\Column(type: 'text', length: 255)]
     private string $description;
 
-    #[ORM\Column(type: 'date_immutable')]
+    #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeInterface $createdAt
     ;
-    #[ORM\Column(type: 'date_immutable')]
+    #[ORM\Column(type: 'datetime_immutable')]
     private ?\DateTimeInterface $updatedAt;
+
+    public function __construct($id)
+    {
+        $this->id = $id;
+    }
 
     public function getId(): string
     {
@@ -49,14 +55,16 @@ class Project
         return $this->updatedAt;
     }
 
-    public function setName(string $name): void
+    public function setName(string $name): self
     {
         $this->name = $name;
+        return $this;
     }
 
-    public function setDescription(string $description): void
+    public function setDescription(string $description): self
     {
         $this->description = $description;
+        return $this;
     }
 
     #[ORM\PrePersist]
@@ -71,7 +79,7 @@ class Project
         if ($this->updatedAt === null) {
             $this->updatedAt = new \DateTimeImmutable();
         }
-        $this->updatedAt->modify('now');
+        $this->updatedAt = $this->updatedAt->modify('now');
     }
 
 }

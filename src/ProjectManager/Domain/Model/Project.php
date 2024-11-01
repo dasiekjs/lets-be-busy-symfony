@@ -56,8 +56,8 @@ class Project
     public static function create(
         ProjectId $id,
         string $name,
-        int $issuesNum = 0,
-        string $description = null
+        string $description = null,
+        ?int $issuesNum = 0,
     ) {
         // todo: validation
         return new self($id, $name, $issuesNum, $description);

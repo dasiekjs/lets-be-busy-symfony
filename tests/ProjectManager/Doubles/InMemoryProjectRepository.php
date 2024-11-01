@@ -19,7 +19,7 @@ class InMemoryProjectRepository implements ProjectRepository
         );
     }
 
-    public function save(Project $project)
+    public function save(Project $project): void
     {
         if (array_key_exists($project->getId()->value, $this->projects)) {
             throw new InvalidProjectException(
