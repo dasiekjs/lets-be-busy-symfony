@@ -43,7 +43,7 @@ class Project
         $this->name = $name;
     }
 
-    public function increaseIssuesNum(int $issuesNum): void
+    public function increaseIssuesNum(): void
     {
         $this->issuesNum++;
     }

@@ -19,6 +19,9 @@ class Project
     #[ORM\Column(type: 'text', length: 255)]
     private string $description;
 
+    #[ORM\Column(type: 'integer')]
+    private int $issuesNum;
+
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeInterface $createdAt
     ;
@@ -64,6 +67,17 @@ class Project
     public function setDescription(string $description): self
     {
         $this->description = $description;
+        return $this;
+    }
+
+    public function getIssuesNum(): int
+    {
+        return $this->issuesNum;
+    }
+
+    public function setIssuesNum(int $issuesNum): self
+    {
+        $this->issuesNum = $issuesNum;
         return $this;
     }
 

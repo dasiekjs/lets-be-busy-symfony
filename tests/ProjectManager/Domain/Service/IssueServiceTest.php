@@ -3,6 +3,7 @@
 namespace Tests\LetsBeBusy\ProjectManager\Domain\Service;
 
 use LetsBeBusy\ProjectManager\Application\DTO\CreateIssueDTO;
+use LetsBeBusy\ProjectManager\Application\Service\NextIssueIdGeneratorService;
 use LetsBeBusy\ProjectManager\Domain\IssueId;
 use LetsBeBusy\ProjectManager\Domain\Model\Issue;
 use LetsBeBusy\ProjectManager\Domain\ProjectId;
@@ -17,18 +18,16 @@ class IssueServiceTest extends TestCase
     {
         $issueRepository = new InMemoryIssueRepository();
         $projectRepository = new InMemoryProjectRepository();
+        $issueIdGenerator = new NextIssueIdGeneratorService();
 
-        $service = new IssueService($issueRepository, $projectRepository);
+        $service = new IssueService($issueRepository, $projectRepository, $issueIdGenerator);
 
         $service->create(
+            new ProjectId('INMEM'),
             new CreateIssueDTO(
                 title: 'Title',
-                content: 'Content',
-                projectId: new ProjectId(
-                    'INMEM'
-                )
-            ),
-            new IssueId('INMEM-2')
+                content: 'Content'
+            )
         );
 
         $newIssue = $issueRepository->getById(new IssueId('INMEM-2'));

@@ -16,6 +16,8 @@ class InMemoryProjectRepository implements ProjectRepository
         $this->projects['INMEM'] = Project::create(
             new ProjectId('INMEM'),
             'InMemoryProject',
+            '',
+            1
         );
     }
 
@@ -24,6 +26,16 @@ class InMemoryProjectRepository implements ProjectRepository
         if (array_key_exists($project->getId()->value, $this->projects)) {
             throw new InvalidProjectException(
                 sprintf('Project with id "%s" already exists', $project->getId()->value),
+            );
+        }
+
+        $this->projects[$project->getId()->value] = $project;
+    }
+    public function update(Project $project): void
+    {
+        if (!array_key_exists($project->getId()->value, $this->projects)) {
+            throw new InvalidProjectException(
+                sprintf('Project with id "%s" not found', $project->getId()->value),
             );
         }
 

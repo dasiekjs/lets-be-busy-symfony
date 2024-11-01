@@ -4,7 +4,9 @@ namespace Tests\LetsBeBusy\ProjectManager\Doubles;
 
 use LetsBeBusy\ProjectManager\Domain\Exception\InvalidIssueException;
 use LetsBeBusy\ProjectManager\Domain\IssueId;
+use LetsBeBusy\ProjectManager\Domain\IssueIdGeneratorInterface;
 use LetsBeBusy\ProjectManager\Domain\Model\Issue;
+use LetsBeBusy\ProjectManager\Domain\Model\Project;
 use LetsBeBusy\ProjectManager\Domain\ProjectId;
 use LetsBeBusy\ProjectManager\Domain\Repository\IssueRepository;
 

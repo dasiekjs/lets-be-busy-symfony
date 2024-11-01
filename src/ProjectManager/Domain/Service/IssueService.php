@@ -6,25 +6,33 @@ use LetsBeBusy\ProjectManager\Application\DTO\CreateIssueDTO;
 use LetsBeBusy\ProjectManager\Domain\Exception\ProjectNotFoundException;
 use LetsBeBusy\ProjectManager\Domain\Factory\IssueFactory;
 use LetsBeBusy\ProjectManager\Domain\IssueId;
+use LetsBeBusy\ProjectManager\Domain\IssueIdGeneratorInterface;
+use LetsBeBusy\ProjectManager\Domain\ProjectId;
 use LetsBeBusy\ProjectManager\Domain\Repository\IssueRepository;
 use LetsBeBusy\ProjectManager\Domain\Repository\ProjectRepository;
 
-class IssueService
+readonly class IssueService
 {
     public function __construct(
-        private readonly IssueRepository $issueRepository,
-        private readonly ProjectRepository $projectRepository,
+        private IssueRepository $issueRepository,
+        private ProjectRepository $projectRepository,
+        private IssueIdGeneratorInterface $issueIdGenerator
     )
     {
     }
 
-    public function create(CreateIssueDTO $createIssueDTO, IssueId $issueId): void
+    public function create(
+        ProjectId $projectId,
+        CreateIssueDTO $createIssueDTO
+    ): IssueId
     {
-        $selectedProject = $this->projectRepository->getById($createIssueDTO->projectId);
+        $selectedProject = $this->projectRepository->getById($projectId);
 
         if ($selectedProject === null) {
-            throw new ProjectNotFoundException("Project with id {$createIssueDTO->projectId->value} not found");
+            throw new ProjectNotFoundException("Project with id {$projectId->value} not found");
         }
+
+        $issueId = $this->issueIdGenerator->generate($selectedProject);
 
         $issue = IssueFactory::create(
             id: $issueId,
@@ -34,5 +42,10 @@ class IssueService
         );
 
         $this->issueRepository->save($issue);
+
+        $selectedProject->increaseIssuesNum();
+        $this->projectRepository->update($selectedProject);
+
+        return $issueId;
     }
 }

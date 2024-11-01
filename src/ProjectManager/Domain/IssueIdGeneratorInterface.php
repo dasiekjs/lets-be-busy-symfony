@@ -1,8 +1,7 @@
 <?php
 
-namespace LetsBeBusy\ProjectManager\Application\Service;
+namespace LetsBeBusy\ProjectManager\Domain;
 
-use LetsBeBusy\ProjectManager\Domain\IssueId;
 use LetsBeBusy\ProjectManager\Domain\Model\Project;
 
 interface IssueIdGeneratorInterface

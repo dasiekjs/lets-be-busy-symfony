@@ -25,7 +25,7 @@ class DbalIssueRepository extends ServiceEntityRepository implements IssueReposi
     {
         $project = $this->getEntityManager()
             ->getRepository(Project::class)
-            ->find($issue->getProjectId());
+            ->find($issue->getProjectId()->value);
 
         $issue = (new Issue($issue->getId()->getValue()))
             ->setTitle($issue->getTitle())

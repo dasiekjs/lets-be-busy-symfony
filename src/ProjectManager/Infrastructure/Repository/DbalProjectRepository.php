@@ -28,8 +28,29 @@ class DbalProjectRepository extends ServiceEntityRepository implements ProjectRe
         $this->getEntityManager()->flush();
     }
 
+    public function update(DomainProject $project): void
+    {
+        $projectId = $project->getId();
+        /**
+         * @var Project $updated
+         */
+        $updated = $this->findOneBy([
+            'id' => $projectId->value,
+        ]);
+
+        $updated->setName($project->getName());
+        $updated->setDescription($project->getDescription());
+        $updated->setIssuesNum($project->getIssuesNum());
+
+        $this->getEntityManager()->persist($updated);
+        $this->getEntityManager()->flush();
+    }
+
     public function getById(ProjectId $id): ?DomainProject
     {
+        /**
+         * @var Project | null $project
+         */
         $project = $this->findOneBy([
             'id' => $id->value,
         ]);
@@ -41,18 +62,20 @@ class DbalProjectRepository extends ServiceEntityRepository implements ProjectRe
         return DomainProject::create(
             new ProjectId($project->getId()),
             $project->getName(),
-            $project->getDescription()
+            $project->getDescription(),
+            $project->getIssuesNum()
         );
     }
 
     public function getAll(): array
     {
         $projects = $this->findAll();
-        return array_map(function (DomainProject $project) {
+        return array_map(function (Project $project) {
             return DomainProject::create(
                 new ProjectId($project->getId()),
                 $project->getName(),
-                $project->getDescription()
+                $project->getDescription(),
+                $project->getIssuesNum()
             );
         }, $projects);
     }
