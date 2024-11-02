@@ -3,8 +3,9 @@
 namespace LetsBeBusy\ProjectManager\Infrastructure\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use LetsBeBusy\ProjectManager\Infrastructure\Repository\DbalIssueRepository;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: DbalIssueRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 class Issue
 {
