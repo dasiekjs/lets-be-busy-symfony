@@ -3,7 +3,9 @@
 namespace LetsBeBusy\ProjectManager\Infrastructure\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
+use LetsBeBusy\ProjectManager\Application\Repository\AppIssueRepository;
 use LetsBeBusy\ProjectManager\Domain\Factory\IssueFactory;
 use LetsBeBusy\ProjectManager\Domain\IssueId;
 use LetsBeBusy\ProjectManager\Domain\Model\Issue as DomainIssue;
@@ -12,9 +14,8 @@ use LetsBeBusy\ProjectManager\Domain\Repository\IssueRepository;
 use LetsBeBusy\ProjectManager\Infrastructure\Entity\Issue;
 
 use LetsBeBusy\ProjectManager\Infrastructure\Entity\Project;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-class DbalIssueRepository extends ServiceEntityRepository implements IssueRepository
+class DbalIssueRepository extends ServiceEntityRepository implements IssueRepository, AppIssueRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -23,9 +24,7 @@ class DbalIssueRepository extends ServiceEntityRepository implements IssueReposi
 
     public function save(DomainIssue $issue): void
     {
-        $project = $this->getEntityManager()
-            ->getRepository(Project::class)
-            ->find($issue->getProjectId()->value);
+        $project = $this->getEntityManager()->getReference(Project::class, $issue->getProjectId()->value);
 
         $issue = (new Issue($issue->getId()->getValue()))
             ->setTitle($issue->getTitle())
@@ -57,19 +56,8 @@ class DbalIssueRepository extends ServiceEntityRepository implements IssueReposi
 
     public function getAllByProject(ProjectId $projectId): array
     {
-
-        $projectIdValue = $projectId->value;
-
-        $project = $this->getEntityManager()
-            ->getRepository(Project::class)
-            ->find($projectIdValue);
-
-        if (null === $project) {
-            throw new NotFoundHttpException("Project {$projectIdValue} not found");
-        }
-
         $issues = $this->findBy([
-            'project' => $project,
+            'project' => $this->getEntityManager()->getReference(Project::class, $projectId->value),
         ], ['createdAt' => 'DESC']);
 
         return array_map(function (Issue $issue) {
@@ -80,5 +68,36 @@ class DbalIssueRepository extends ServiceEntityRepository implements IssueReposi
                 $issue->getContent()
             );
         }, $issues);
+    }
+    
+    public function findIssuesByProjectId(ProjectId $projectId, int $page = 1, int $perPage = 20, $filters = null): array
+    {
+
+        $queryBuilder = $this->createQueryBuilder('i')
+            ->where('i.project = :projectId')
+            ->setParameter('projectId', $projectId->value)
+            ->orderBy('i.createdAt', 'DESC');
+
+        if ($filters) {
+            foreach ($filters as $field => $value) {
+                $queryBuilder->andWhere(sprintf('i.%s = :%s', $field, $field))
+                    ->setParameter($field, $value);
+            }
+        }
+
+        $query = $queryBuilder->getQuery();
+
+        $paginator = new Paginator($query);
+
+        $paginator->getQuery()
+            ->setFirstResult(($page - 1) * $perPage)
+            ->setMaxResults($perPage);
+
+        return [
+            'data' => iterator_to_array($paginator),
+            'total' => count($paginator),
+            'currentPage' => $page,
+            'perPage' => $perPage,
+        ];
     }
 }

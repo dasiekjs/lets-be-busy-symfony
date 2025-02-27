@@ -2,7 +2,7 @@
 
 namespace LetsBeBusy\ProjectManager\Application\DTO;
 
-use LetsBeBusy\ProjectManager\Domain\Model\Issue;
+use LetsBeBusy\ProjectManager\Infrastructure\Entity\Issue;
 
 readonly class IssueDTO {
 
@@ -11,16 +11,18 @@ readonly class IssueDTO {
         public string $title,
         public string $content,
         public string $createdAt,
+        public ProjectDTO $project,
     )
     {
     }
 
-    public static function fromDomain(Issue $issue): self {
+    public static function from(Issue $issue): self {
         return new self(
-            $issue->getId()->getValue(),
+            $issue->getId(),
             $issue->getTitle(),
             $issue->getContent(),
             $issue->getCreatedAt()->format(DATE_ATOM),
+            new ProjectDTO($issue->getProject()->getId(), $issue->getProject()->getName(), $issue->getProject()->getDescription())
         );
     }
 }

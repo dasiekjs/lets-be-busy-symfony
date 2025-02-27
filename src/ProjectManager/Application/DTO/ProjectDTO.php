@@ -22,4 +22,11 @@ readonly class ProjectDTO
             $data->getDescription()
         );
     }
+
+    public static function fromArray(array $data): array
+    {
+        return array_map(function ($value) {
+            return self::fromDomain($value);
+        }, $data);
+    }
 }

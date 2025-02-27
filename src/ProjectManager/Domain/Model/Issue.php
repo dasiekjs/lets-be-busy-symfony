@@ -11,6 +11,7 @@ class Issue
         private readonly IssueId $id,
         private ProjectId $projectId,
         private string $title,
+        private IssueStatus $issueStatus,
         private string | null $content,
         private \DateTimeImmutable $createdAt,
         private ?\DateTimeImmutable $updatedAt = null,
@@ -30,6 +31,16 @@ class Issue
     public function getTitle(): string
     {
         return $this->title;
+    }
+
+    public function getIssueStatus(): IssueStatus
+    {
+        return $this->issueStatus;
+    }
+
+    public function setIssueStatus(IssueStatus $issueStatus): void
+    {
+        $this->issueStatus = $issueStatus;
     }
 
     public function getContent(): ?string
@@ -61,6 +72,4 @@ class Issue
     {
         $this->updatedAt = $updatedAt;
     }
-
-
 }

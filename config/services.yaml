@@ -16,8 +16,15 @@ services:
     LetsBeBusy\:
         resource: '../src/'
         exclude:
-            - '../LetsBeBusy/ProjectManager/Domain/'
+            - '../src/ProjectManager/Domain/'
+            - '../src/ProjectManager/Application/DTO'
             - '../src/Kernel.php'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    LetsBeBusy\ProjectManager\Domain\Repository\ProjectRepository:
+        class: LetsBeBusy\ProjectManager\Infrastructure\Repository\DbalProjectRepository
+
+    LetsBeBusy\ProjectManager\Domain\Repository\IssueRepository:
+        class: LetsBeBusy\ProjectManager\Infrastructure\Repository\DbalIssueRepository

@@ -7,13 +7,16 @@ namespace LetsBeBusy\ProjectManager\Application\Controller;
 use LetsBeBusy\ProjectManager\Application\DTO\CreateIssueDTO;
 use LetsBeBusy\ProjectManager\Application\DTO\IssueDTO;
 use LetsBeBusy\ProjectManager\Application\DTO\IssuePreviewDTO;
+use LetsBeBusy\ProjectManager\Application\DTO\PaginatedDataDTO;
 use LetsBeBusy\ProjectManager\Application\DTO\ProjectDTO;
+use LetsBeBusy\ProjectManager\Application\Repository\AppIssueRepository;
+use LetsBeBusy\ProjectManager\Infrastructure\Entity\Issue;
 use LetsBeBusy\ProjectManager\Domain\ProjectId;
-use LetsBeBusy\ProjectManager\Domain\Repository\IssueRepository;
 use LetsBeBusy\ProjectManager\Domain\Repository\ProjectRepository;
 use LetsBeBusy\ProjectManager\Domain\Service\IssueService;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
@@ -24,7 +27,30 @@ use OpenApi\Attributes as OA;
 class ProjectController extends AbstractController
 {
 
-    #[Route('/{id}', name: '_find', methods: ['GET'])]
+    #[Route( name: '_find_all', methods: ['GET'])]
+    #[OA\Get(
+        description: 'Find from all projects',
+        summary: 'Find from all projects',
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Return selected Project',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: ProjectDTO::class))
+        )
+    )]
+    public function findAll(ProjectRepository $projectRepository): Response
+    {
+        $project = $projectRepository->getAll();
+
+        return $this->json([
+            'data' => ProjectDTO::fromArray($project),
+            // TODO add pagination data?
+        ]);
+    }
+
+    #[Route('/{id}', name: '_find_one', methods: ['GET'])]
     #[OA\Get(
         description: 'Get a single project',
         summary: 'Get a single project',
@@ -70,8 +96,9 @@ class ProjectController extends AbstractController
     )]
     public function getProjectIssuesById(
         string $id,
+        Request $request,
         ProjectRepository $projectRepository,
-        IssueRepository $issueRepository,
+        AppIssueRepository $appIssueRepository,
     ): Response
     {
         // TODO Move this into parameter resolver
@@ -81,13 +108,24 @@ class ProjectController extends AbstractController
             throw $this->createNotFoundException("Project {$id} not found");
         }
 
-        $issues = $issueRepository->getAllByProject($project->getId());
-
-        return $this->json(
-            array_map(function ($i) {
-                return IssuePreviewDTO::fromIssue($i);
-            }, $issues)
+        $page = $request->query->getInt('page', 1);
+        $perPage = $request->query->getInt('perPage', 10);
+        $issuesPaginated = $appIssueRepository->findIssuesByProjectId(
+            $project->getId(),
+            $page,
+            $perPage
         );
+
+        $response = new PaginatedDataDTO(
+            array_map(function (Issue $issue) {
+                return IssueDTO::from($issue);
+            }, $issuesPaginated['data']),
+            $issuesPaginated['total'],
+            $issuesPaginated['currentPage'],
+            $issuesPaginated['perPage']
+        );
+
+        return $this->json($response);
     }
 
     #[Route('/{id}/create', name: '_create_issue', methods: ['POST'])]

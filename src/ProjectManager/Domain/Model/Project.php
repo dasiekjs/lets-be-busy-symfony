@@ -56,7 +56,7 @@ class Project
     public static function create(
         ProjectId $id,
         string $name,
-        string $description = null,
+        ?string $description,
         ?int $issuesNum = 0,
     ) {
         // todo: validation
